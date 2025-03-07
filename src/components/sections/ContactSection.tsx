@@ -16,31 +16,86 @@ const ContactSection = () => {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+    
+    if (!formData.subject.trim()) {
+      newErrors.subject = 'Subject is required';
+    }
+    
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required';
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = 'Message must be at least 10 characters';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear the error for this field if it exists
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        title: "Form validation failed",
+        description: "Please check the form for errors.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    // Simulate form submission
+    // Simulate form submission with a delay
     setTimeout(() => {
       toast({
         title: "Message sent!",
         description: "Thank you for your message. I'll get back to you soon.",
       });
+      
       setFormData({
         name: '',
         email: '',
         subject: '',
         message: ''
       });
+      
       setIsSubmitting(false);
     }, 1500);
   };
+
+  const socialLinks = [
+    { icon: <Github size={20} />, href: "https://github.com", label: "GitHub" },
+    { icon: <Linkedin size={20} />, href: "https://linkedin.com", label: "LinkedIn" },
+    { icon: <Twitter size={20} />, href: "https://twitter.com", label: "Twitter" }
+  ];
 
   return (
     <section id="contact" className="py-24 px-6">
@@ -63,7 +118,16 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h4 className="font-medium">Email</h4>
-                  <a href="mailto:hello@example.com" className="text-muted-foreground hover:text-primary transition-colors">
+                  <a 
+                    href="mailto:hello@example.com" 
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                    onClick={() => {
+                      toast({
+                        title: "Opening email client",
+                        description: "Composing email to hello@example.com",
+                      });
+                    }}
+                  >
                     hello@example.com
                   </a>
                 </div>
@@ -75,7 +139,16 @@ const ContactSection = () => {
                 </div>
                 <div>
                   <h4 className="font-medium">Phone</h4>
-                  <a href="tel:+1234567890" className="text-muted-foreground hover:text-primary transition-colors">
+                  <a 
+                    href="tel:+1234567890" 
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                    onClick={() => {
+                      toast({
+                        title: "Phone",
+                        description: "Calling +1 (234) 567-890",
+                      });
+                    }}
+                  >
                     +1 (234) 567-890
                   </a>
                 </div>
@@ -97,30 +170,28 @@ const ContactSection = () => {
             <div className="mt-10">
               <h4 className="font-medium mb-4">Connect with me</h4>
               <div className="flex space-x-4">
-                <a 
-                  href="https://github.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary/20 hover:border-primary/50 transition-colors"
-                >
-                  <Github size={20} />
-                </a>
-                <a 
-                  href="https://linkedin.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary/20 hover:border-primary/50 transition-colors"
-                >
-                  <Linkedin size={20} />
-                </a>
-                <a 
-                  href="https://twitter.com" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary/20 hover:border-primary/50 transition-colors"
-                >
-                  <Twitter size={20} />
-                </a>
+                {socialLinks.map((link, index) => (
+                  <a 
+                    key={index}
+                    href={link.href} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary/20 hover:border-primary/50 transition-colors"
+                    aria-label={link.label}
+                    onClick={(e) => {
+                      // In a demo, prevent actual navigation
+                      if (import.meta.env.DEV) {
+                        e.preventDefault();
+                        toast({
+                          title: "Social Link",
+                          description: `Opening ${link.label} profile`,
+                        });
+                      }
+                    }}
+                  >
+                    {link.icon}
+                  </a>
+                ))}
               </div>
             </div>
           </div>
@@ -138,9 +209,12 @@ const ContactSection = () => {
                     placeholder="John Doe"
                     value={formData.name}
                     onChange={handleChange}
-                    required
-                    className="bg-white/5 border-white/10 focus:border-primary"
+                    className={`bg-white/5 border-white/10 focus:border-primary ${errors.name ? 'border-red-500' : ''}`}
+                    aria-invalid={errors.name ? 'true' : 'false'}
                   />
+                  {errors.name && (
+                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label htmlFor="email" className="text-sm font-medium">
@@ -153,9 +227,12 @@ const ContactSection = () => {
                     placeholder="john@example.com"
                     value={formData.email}
                     onChange={handleChange}
-                    required
-                    className="bg-white/5 border-white/10 focus:border-primary"
+                    className={`bg-white/5 border-white/10 focus:border-primary ${errors.email ? 'border-red-500' : ''}`}
+                    aria-invalid={errors.email ? 'true' : 'false'}
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
                 </div>
               </div>
               
@@ -169,9 +246,12 @@ const ContactSection = () => {
                   placeholder="Project Inquiry"
                   value={formData.subject}
                   onChange={handleChange}
-                  required
-                  className="bg-white/5 border-white/10 focus:border-primary"
+                  className={`bg-white/5 border-white/10 focus:border-primary ${errors.subject ? 'border-red-500' : ''}`}
+                  aria-invalid={errors.subject ? 'true' : 'false'}
                 />
+                {errors.subject && (
+                  <p className="text-red-500 text-sm mt-1">{errors.subject}</p>
+                )}
               </div>
               
               <div className="space-y-2">
@@ -184,9 +264,12 @@ const ContactSection = () => {
                   placeholder="Tell me about your project..."
                   value={formData.message}
                   onChange={handleChange}
-                  required
-                  className="min-h-[150px] bg-white/5 border-white/10 focus:border-primary"
+                  className={`min-h-[150px] bg-white/5 border-white/10 focus:border-primary ${errors.message ? 'border-red-500' : ''}`}
+                  aria-invalid={errors.message ? 'true' : 'false'}
                 />
+                {errors.message && (
+                  <p className="text-red-500 text-sm mt-1">{errors.message}</p>
+                )}
               </div>
               
               <Button 

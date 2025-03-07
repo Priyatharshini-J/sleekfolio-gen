@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { ExternalLink, Github } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface Project {
   id: number;
@@ -17,6 +18,7 @@ interface Project {
 }
 
 const ProjectsSection = () => {
+  const { toast } = useToast();
   const projects: Project[] = [
     {
       id: 1,
@@ -82,10 +84,34 @@ const ProjectsSection = () => {
 
   const categories = ["all", "web", "design", "mobile"];
   const [activeCategory, setActiveCategory] = useState("all");
-  
-  const filteredProjects = activeCategory === "all" 
-    ? projects 
-    : projects.filter(project => project.category === activeCategory);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>(projects);
+  const [animateCards, setAnimateCards] = useState(false);
+
+  useEffect(() => {
+    // Apply animation effect when changing categories
+    setAnimateCards(false);
+    
+    setTimeout(() => {
+      const filtered = activeCategory === "all" 
+        ? projects 
+        : projects.filter(project => project.category === activeCategory);
+      
+      setFilteredProjects(filtered);
+      setAnimateCards(true);
+    }, 300);
+  }, [activeCategory]);
+
+  const handleCategoryChange = (category: string) => {
+    setActiveCategory(category);
+  };
+
+  const visitProject = (url: string, title: string) => {
+    window.open(url, '_blank');
+    toast({
+      title: "Visiting project",
+      description: `Opening ${title} in a new tab`,
+    });
+  };
 
   return (
     <section id="projects" className="py-24 px-6 bg-black/40">
@@ -105,7 +131,7 @@ const ProjectsSection = () => {
                 key={category}
                 variant={activeCategory === category ? "default" : "outline"}
                 className={activeCategory === category ? "bg-primary" : "border-white/10 hover:bg-white/5"}
-                onClick={() => setActiveCategory(category)}
+                onClick={() => handleCategoryChange(category)}
               >
                 {category.charAt(0).toUpperCase() + category.slice(1)}
               </Button>
@@ -115,7 +141,10 @@ const ProjectsSection = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProjects.map((project) => (
-            <Card key={project.id} className="glass-card overflow-hidden hover-card">
+            <Card 
+              key={project.id} 
+              className={`glass-card overflow-hidden hover-card transition-opacity duration-300 ${animateCards ? 'opacity-100' : 'opacity-0'}`}
+            >
               <div className="aspect-video relative overflow-hidden">
                 <img 
                   src={project.image} 
@@ -137,15 +166,20 @@ const ProjectsSection = () => {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Button variant="outline" size="sm" className="border-white/10" asChild>
-                  <a href={project.repoUrl} target="_blank" rel="noopener noreferrer">
-                    <Github size={16} className="mr-2" /> Code
-                  </a>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-white/10" 
+                  onClick={() => visitProject(project.repoUrl, `${project.title} repository`)}
+                >
+                  <Github size={16} className="mr-2" /> Code
                 </Button>
-                <Button size="sm" className="bg-primary hover:bg-primary/90" asChild>
-                  <a href={project.liveUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink size={16} className="mr-2" /> Live Demo
-                  </a>
+                <Button 
+                  size="sm" 
+                  className="bg-primary hover:bg-primary/90" 
+                  onClick={() => visitProject(project.liveUrl, project.title)}
+                >
+                  <ExternalLink size={16} className="mr-2" /> Live Demo
                 </Button>
               </CardFooter>
             </Card>
@@ -153,7 +187,16 @@ const ProjectsSection = () => {
         </div>
         
         <div className="text-center mt-12">
-          <Button variant="outline" className="border-white/10 hover:bg-white/5">
+          <Button 
+            variant="outline" 
+            className="border-white/10 hover:bg-white/5"
+            onClick={() => {
+              toast({
+                title: "All Projects",
+                description: "View more projects coming soon!",
+              });
+            }}
+          >
             View All Projects
           </Button>
         </div>

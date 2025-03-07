@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,18 +52,49 @@ const TestimonialsSection = () => {
   ];
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const goToPrevious = () => {
+    if (isAnimating) return;
+    
+    setIsAnimating(true);
     setActiveIndex((current) => (current === 0 ? testimonials.length - 1 : current - 1));
+    
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 500);
   };
 
   const goToNext = () => {
+    if (isAnimating) return;
+    
+    setIsAnimating(true);
     setActiveIndex((current) => (current === testimonials.length - 1 ? 0 : current + 1));
+    
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 500);
   };
 
   const goToIndex = (index: number) => {
+    if (isAnimating || index === activeIndex) return;
+    
+    setIsAnimating(true);
     setActiveIndex(index);
+    
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 500);
   };
+
+  // Auto-advance carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      goToNext();
+    }, 8000);
+    
+    return () => clearInterval(interval);
+  }, [activeIndex, isAnimating]);
 
   return (
     <section id="testimonials" className="py-24 px-6">
@@ -79,7 +110,7 @@ const TestimonialsSection = () => {
         <div className="relative max-w-4xl mx-auto">
           <div className="overflow-hidden">
             <div 
-              className="flex transition-transform duration-500 ease-in-out" 
+              className={`flex transition-transform duration-500 ease-in-out ${isAnimating ? 'opacity-50' : 'opacity-100'}`}
               style={{ transform: `translateX(-${activeIndex * 100}%)` }}
             >
               {testimonials.map((testimonial) => (
@@ -141,6 +172,8 @@ const TestimonialsSection = () => {
                 size="icon" 
                 className="border-white/10 hover:bg-white/5 rounded-full"
                 onClick={goToPrevious}
+                disabled={isAnimating}
+                aria-label="Previous testimonial"
               >
                 <ChevronLeft size={18} />
               </Button>
@@ -149,6 +182,8 @@ const TestimonialsSection = () => {
                 size="icon" 
                 className="border-white/10 hover:bg-white/5 rounded-full"
                 onClick={goToNext}
+                disabled={isAnimating}
+                aria-label="Next testimonial"
               >
                 <ChevronRight size={18} />
               </Button>

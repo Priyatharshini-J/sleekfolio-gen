@@ -5,6 +5,13 @@ import { Github, Linkedin, Mail, Twitter } from 'lucide-react';
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
   return (
     <footer className="bg-black py-12 px-6">
       <div className="container max-w-7xl mx-auto">
@@ -20,27 +27,49 @@ const Footer = () => {
             <div>
               <h4 className="text-lg font-medium mb-4">Links</h4>
               <ul className="space-y-2">
-                <li><a href="#about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About</a></li>
-                <li><a href="#projects" className="text-sm text-muted-foreground hover:text-primary transition-colors">Projects</a></li>
-                <li><a href="#testimonials" className="text-sm text-muted-foreground hover:text-primary transition-colors">Testimonials</a></li>
-                <li><a href="#blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</a></li>
-                <li><a href="#contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
+                <li><button onClick={() => scrollToSection('about')} className="text-sm text-muted-foreground hover:text-primary transition-colors">About</button></li>
+                <li><button onClick={() => scrollToSection('projects')} className="text-sm text-muted-foreground hover:text-primary transition-colors">Projects</button></li>
+                <li><button onClick={() => scrollToSection('testimonials')} className="text-sm text-muted-foreground hover:text-primary transition-colors">Testimonials</button></li>
+                <li><button onClick={() => scrollToSection('blog')} className="text-sm text-muted-foreground hover:text-primary transition-colors">Blog</button></li>
+                <li><button onClick={() => scrollToSection('contact')} className="text-sm text-muted-foreground hover:text-primary transition-colors">Contact</button></li>
               </ul>
             </div>
             
             <div>
               <h4 className="text-lg font-medium mb-4">Social</h4>
               <div className="flex space-x-4">
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <a 
+                  href="https://github.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="GitHub profile"
+                >
                   <Github size={20} />
                 </a>
-                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <a 
+                  href="https://linkedin.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="LinkedIn profile"
+                >
                   <Linkedin size={20} />
                 </a>
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <a 
+                  href="https://twitter.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="Twitter profile"
+                >
                   <Twitter size={20} />
                 </a>
-                <a href="mailto:hello@example.com" className="text-muted-foreground hover:text-primary transition-colors">
+                <a 
+                  href="mailto:hello@example.com" 
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  aria-label="Email contact"
+                >
                   <Mail size={20} />
                 </a>
               </div>

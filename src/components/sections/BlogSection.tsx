@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Calendar } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface BlogPost {
   id: number;
@@ -16,6 +17,8 @@ interface BlogPost {
 }
 
 const BlogSection = () => {
+  const { toast } = useToast();
+  
   const posts: BlogPost[] = [
     {
       id: 1,
@@ -45,6 +48,23 @@ const BlogSection = () => {
       url: "#blog/3"
     },
   ];
+
+  const handleReadMore = (post: BlogPost) => {
+    toast({
+      title: "Opening article",
+      description: `Reading: ${post.title}`,
+    });
+    
+    // In a production app, we'd navigate to the article
+    // For now, we'll just show a toast
+  };
+
+  const handleViewAllArticles = () => {
+    toast({
+      title: "Blog Archive",
+      description: "View all articles feature coming soon!",
+    });
+  };
 
   return (
     <section id="blog" className="py-24 px-6 bg-black/40">
@@ -81,10 +101,12 @@ const BlogSection = () => {
                 </p>
               </CardContent>
               <CardFooter>
-                <Button variant="ghost" className="p-0 hover:bg-transparent hover:text-primary" asChild>
-                  <a href={post.url}>
-                    Read More <ArrowRight size={16} className="ml-2" />
-                  </a>
+                <Button 
+                  variant="ghost" 
+                  className="p-0 hover:bg-transparent hover:text-primary"
+                  onClick={() => handleReadMore(post)}
+                >
+                  Read More <ArrowRight size={16} className="ml-2" />
                 </Button>
               </CardFooter>
             </Card>
@@ -92,7 +114,11 @@ const BlogSection = () => {
         </div>
         
         <div className="text-center mt-12">
-          <Button variant="outline" className="border-white/10 hover:bg-white/5">
+          <Button 
+            variant="outline" 
+            className="border-white/10 hover:bg-white/5"
+            onClick={handleViewAllArticles}
+          >
             View All Articles
           </Button>
         </div>
